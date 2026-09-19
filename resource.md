@@ -1,18 +1,7 @@
 # HackMysuru 1.0 — Phase 1 Submission Index
 
-> **This is the landing file for your submission.** Reviewers open this file first.
-> Every evaluation artifact is uploaded to **Google Drive** and linked below. No files in the repo, no other platforms.
-> Freeze: **20 September 2026, 23:59 IST.** Anything not linked here before the freeze does not exist for judging.
-
-<!--
-HOW TO FILL THIS FILE
-1. Replace every <placeholder>. Delete these HTML comments if you like (they don't render on GitHub).
-2. Use a PERSONAL Gmail account for uploads. Many college Google Workspace accounts block
-   "Anyone with the link" sharing outside the college domain, and reviewers will see "Request access".
-3. Share each FILE (not a folder) as: General access → "Anyone with the link" → Viewer.
-4. Test every link in an incognito/private window before the deadline.
-5. Do not replace or re-upload a file after the freeze. Reviewers compare the SHA-256 below.
--->
+> **This is the landing file for our submission.**
+> Reviewers can use this file to access the repository documents, live MVP, and final evaluation artifacts.
 
 ---
 
@@ -20,26 +9,29 @@ HOW TO FILL THIS FILE
 
 | Field | Value |
 |---|---|
-| Team ID (from dashboard) | `<HM1-XXXX>` |
-| Team Name | `<team name>` |
-| College(s) | `<college name(s)>` |
-| Team Leader | `<name>` · `<email>` · `<phone>` |
-| Repository | `<https://github.com/org-or-user/repo>` |
+| Team ID | `HM26-2449` |
+| Team Name | `ReBuild Mysore` |
+| College | `Maharaja Institute of Technology Mysore` |
+| Team Leader | `Nithin B C` |
+| Repository | `https://github.com/dev-nithin14/HM26-2449-SUBMISSION` |
 
 | # | Member | Program & Year | GitHub Handle | Primary Role |
 |---|---|---|---|---|
-| 1 | `<name>` (Lead) | `<B.E. CSE, 3rd yr>` | `@<handle>` | `<backend / ML / frontend / ...>` |
-| 2 | `<name>` | `<...>` | `@<handle>` | `<...>` |
-| 3 | `<name>` | `<...>` | `@<handle>` | `<...>` |
-| 4 | `<name>` | `<...>` | `@<handle>` | `<...>` |
+| 1 | `Nithin B C` | `B.E. CSE-AI&ML` | `@dev-nithin14` | `Frontend / Integration` |
+| 2 | `Somashekar N` | `B.E. CSE-AI&ML` | `@<handle>` | `<role>` |
+| 3 | `Adithya S Yadav` | `B.E. CSE-AI&ML` | `@<handle>` | `<role>` |
+| 4 | `Touheed Khan` | `B.E. CSE-AI&ML` | `@<handle>` | `<role>` |
+
+> Replace the remaining GitHub handles and roles with the actual team details before submission.
 
 ---
 
-## 2. What We Built (one-liner)
+## 2. What We Built
 
-**Sub-problem:** `<Routing | Follow-through | Visibility | Verification | Detection without reporting | Segregation drift | Hotspot pattern-finding | Field worker feedback loop | Own: ____>`
+**Sub-problem:** `End-to-end construction-waste coordination`
 
-**In one sentence:** `<e.g. "An offline-first reporting app that auto-routes complaints to MCC, town panchayat or gram panchayat using ward boundaries and issue type, with a confidence score for boundary cases.">`
+**In one sentence:**  
+`ReBuild Mysore is a role-based civic platform that connects construction-waste reporting with AI-assisted analysis, verification, prioritisation, collection, processing, recycling, and impact tracking.`
 
 ---
 
@@ -47,45 +39,43 @@ HOW TO FILL THIS FILE
 
 | Document | What it covers |
 |---|---|
-| [README.md](./README.md) | Problem, users, solution overview, links to everything below |
-| [ai.md](./ai.md) | AI tools used in development and AI/ML inside the product |
-| [docs/architecture.md](./docs/architecture.md) | Diagram, components, data model, APIs, tech stack |
-| [docs/constraints.md](./docs/constraints.md) | How we handle the five hard constraints |
-| [docs/setup.md](./docs/setup.md) | Local setup, seed data, offline testing |
-| [docs/limitations.md](./docs/limitations.md) | Known gaps, edge cases, scaling roadmap |
-| [resource-templates/](./resource-templates/) | Templates & guides for the video, decision log, and presentation |
+| [README.md](./README.md) | Problem, target users, solution, architecture, AI usage, setup and limitations |
+| [ai.md](./ai.md) | AI tools used during development and AI/ML functionality inside the product |
+| [docs/architecture.md](./docs/architecture.md) | System architecture, components, data model, APIs and technical stack |
+| [docs/constraints.md](./docs/constraints.md) | Handling of the five hard constraints |
+| [docs/setup.md](./docs/setup.md) | Local setup, environment configuration, demo accounts and testing |
+| [docs/limitations.md](./docs/limitations.md) | Known limitations, edge cases and scaling roadmap |
+| [resource-templates/](./resource-templates/) | Submission templates and supporting guides |
 
 ---
 
-## 4. Submission Artifacts (Google Drive)
+## 4. Submission Artifacts
 
-| # | Artifact | Google Drive Link | File Name | SHA-256 (first 16 chars) |
+| # | Artifact | Link | File Name | SHA-256 (first 16 chars) |
 |---|---|---|---|---|
-| 1 | [Pitch + Code Walkthrough Video](./resource-templates/video-guide.md) (≤ 10 min, MP4) | `<https://drive.google.com/file/d/.../view>` | `<TeamID>_video.mp4` | `<a1b2c3d4e5f60718>` |
-| 2 | [Decision Log](./resource-templates/decision-log-template.md) (1 page, PDF) | `<https://drive.google.com/file/d/.../view>` | `<TeamID>_decision-log.pdf` | `<...>` |
-| 3 | [Presentation](./resource-templates/presentation-template.md) (≤ 10 slides, PDF) | `<https://drive.google.com/file/d/.../view>` | `<TeamID>_presentation.pdf` | `<...>` |
+| 1 | Pitch + Code Walkthrough Video (≤ 10 min) | `TO BE ADDED` | `HM26-2449_video.mp4` | `TO BE ADDED` |
+| 2 | Decision Log (1 page) | `TO BE ADDED` | `HM26-2449_decision-log.pdf` | `TO BE ADDED` |
+| 3 | Presentation | `TO BE ADDED` | `HM26-2449_presentation.pdf` | `TO BE ADDED` |
 
-<!--
-Get the hash:
-  macOS / Linux : shasum -a 256 <file>      (or sha256sum <file>)
-  Windows       : certutil -hashfile <file> SHA256
-Paste the first 16 characters.
--->
+> All final evaluation artifacts will be uploaded to Google Drive with Viewer access and linked here before the submission freeze.
 
 ### Video Chapters
 
+> Update these timestamps after the final recording. The structure below follows the required evaluation flow.
+
 | Timestamp | Section |
 |---|---|
-| `00:00` | Part 1: Problem & target users |
-| `00:40` | Part 1: Live demo, core flow |
-| `01:50` | Part 1: Bad-input handling |
-| `02:30` | Part 1: Offline / airplane mode |
-| `03:00` | Part 2: Architecture overview |
-| `04:30` | Part 2: Data model & APIs |
-| `05:30` | Part 2: Key code walkthrough |
-| `07:30` | Part 2: Decisions & trade-offs |
-| `08:30` | Part 2: Scaling & limitations |
-| `09:15` | Part 2: AI usage (see [ai.md](./ai.md)) |
+| `00:00` | Problem & target users |
+| `00:40` | Live MVP — core journey |
+| `02:00` | Bad-input / duplicate handling |
+| `02:40` | Offline / connectivity limitation |
+| `03:10` | Architecture overview |
+| `04:20` | Data model & APIs |
+| `05:20` | Core logic walkthrough |
+| `06:40` | Decisions & trade-offs |
+| `07:40` | Mysuru-scale limitations |
+| `08:40` | AI usage & disclosure |
+| `09:20` | Closing / team |
 
 ---
 
@@ -93,34 +83,71 @@ Paste the first 16 characters.
 
 | Field | Value |
 |---|---|
-| Live URL | `<https://...>` |
-| Platform | `<Web / PWA / Android APK link on Drive / ...>` |
-| Test login (if any) | Citizen: `<user / pass>` · Staff: `<user / pass>` · Admin: `<user / pass>` |
-| Sample data loaded? | `<Yes — 120 synthetic complaints across 6 wards>` |
-| How to test offline mode | `<one line>`. Full steps in [docs/setup.md](./docs/setup.md#testing-offline-mode) |
-| If the live link is down | Follow [docs/setup.md](./docs/setup.md) |
+| Live URL | `https://hm-26-2449-submission.vercel.app/` |
+| Platform | `Web Application` |
+| Database | `Demo / repository-based persistence; Supabase is not currently connected to this MVP` |
+| Sample data loaded? | `Yes — fictional/demo Mysuru records` |
+| Offline mode | `The current MVP is online-first. API-dependent operations require network connectivity.` |
+| Local setup | Follow [docs/setup.md](./docs/setup.md) |
+
+### Demo Accounts
+
+All demo accounts use the password:
+
+`demo123`
+
+| Role | Demo Email |
+|---|---|
+| Citizen | `citizen@rebuildmysore.demo` |
+| Builder | `builder@rebuildmysore.demo` |
+| Collection Crew | `collection@rebuildmysore.demo` |
+| Processing Plant | `processing@rebuildmysore.demo` |
+| MCC Admin | `admin@rebuildmysore.demo` |
+
+The login page provides role cards that automatically fill the corresponding demo credentials.
 
 ---
 
-## 6. Quick Reviewer Path (≤ 3 minutes)
+## 6. Quick Reviewer Path
 
-<!-- Tell a reviewer exactly what to click to see your core value. Keep it to 3–5 steps. -->
+A reviewer can understand the core workflow in approximately 3 minutes:
 
-1. `<Open the live URL and log in as Citizen>`
-2. `<Report a blocked drain at the pre-filled boundary location>`
-3. `<Observe the routing decision + confidence score>`
-4. `<Log in as Staff → see it in the panchayat queue → mark resolved>`
-5. `<Open the public ward map → status now shows Resolved>`
+1. Open the [live MVP](https://hm-26-2449-submission.vercel.app/).
+2. Use the **Citizen** demo account to submit/view a construction-waste report.
+3. Observe AI-assisted analysis, verification and priority information associated with the report.
+4. Use the **Collection Crew**, **Processing Plant**, or **MCC Admin** demo account to explore the corresponding operational dashboards.
+5. Follow the report lifecycle from **Report → Verify → Prioritize → Collect → Process → Recycle → Impact**.
 
 ---
 
-## 7. Declaration
+## 7. Core Evaluation Areas
 
-- [ ] All Drive links open in an incognito window with **Viewer** access (no "Request access").
-- [ ] The video is one continuous recording, ≤ 10 minutes, Part 1 then Part 2.
-- [ ] The decision log is one page and written by us in our own words.
-- [ ] All AI tools used (development and in-product) are disclosed in [`ai.md`](./ai.md).
-- [ ] No code specific to this challenge was written before 18 Sept 2026, 00:00 IST.
-- [ ] We will not modify or replace any linked file after 20 Sept 2026, 23:59 IST.
+The MVP demonstrates:
 
-**Submitted by:** `<Team Leader name>` · **Date/Time (IST):** `<20-09-2026 21:40>`
+- Construction-waste reporting with structured information.
+- AI-assisted waste analysis signals.
+- Duplicate and verification checks.
+- Priority calculation using multiple operational factors.
+- Role-based workflows for citizens, builders, collection teams, processing teams and administrators.
+- Collection and processing traceability.
+- Material recovery and recycled-product tracking.
+- Analytics and impact-oriented views.
+- API-based frontend/backend architecture.
+- Demo Mysuru locations and records clearly treated as prototype data.
+
+---
+
+## 8. Declaration
+
+- [ ] All Google Drive links open in an incognito/private window with **Viewer** access.
+- [ ] The final video is one continuous recording and is within the required time limit.
+- [ ] The Decision Log is one page and written by the team in our own words.
+- [ ] All AI tools used during development and inside the product are disclosed in [ai.md](./ai.md).
+- [ ] No challenge-specific code was written before `18 September 2026, 00:00 IST`.
+- [ ] Final artifact links and SHA-256 hashes will be frozen before the submission deadline.
+
+---
+
+**Submitted by:** `Nithin B C`  
+**Team ID:** `HM26-2449`  
+**Project:** `ReBuild Mysore`

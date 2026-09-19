@@ -1,56 +1,44 @@
-# Decision Log — Template (25% of total score)
+# HM26-2449 — PHASE 1 DECISION LOG
 
-[← Back to README](../README.md)
+**Project:** ReBuild Mysore — Intelligent Construction Waste Management for Mysuru  
+**Team:** Nithin B C | Somashekar N | Adithya S Yadav | Touheed Khan  
+**Sub-problem:** End-to-end construction-waste coordination  
+**Date:** 19 September 2026
 
-> **Output:** 1-page PDF, A4, ≥ 10 pt font, named `<TeamID>_decision-log.pdf`, uploaded to Google Drive and linked in [`resource.md`](../resource.md).
-> **Length:** 400–550 words. If it spills onto page 2, cut. Reviewers stop at page 1.
-> **Voice:** Your own words, first person plural ("we"). No marketing. No generic AI prose.
-> Delete everything in *italics* and all blockquotes before exporting.
+## 1. Approach Taken and Alternative Rejected
 
----
+We chose to build a traceable, role-based workflow that connects construction-waste reporting to verification, prioritisation, collection, processing and material recovery.
 
-**Team:** `<Team Name>` (`<Team ID>`)  **Sub-problem:** `<e.g. Verification>`  **Date:** `20 Sept 2026`
+A report begins with waste type, quantity, location and image information. Our prototype AI-analysis layer provides signals such as waste composition, recyclability, image quality, contamination and duplicate probability. These signals are combined with operational factors including quantity, waste type, report age, location sensitivity and recyclability to calculate LOW, MEDIUM, HIGH or CRITICAL priority. The report can then move through verification, routing, collection and processing stages.
 
-## Q1. What approach did we take, and what did we reject? (~150 words)
+We considered a simpler complaint or voting system where reports would mainly be ordered by reporting frequency. This would have been easier to implement within 72 hours, but it would not represent the operational factors involved in construction-waste collection and recovery.
 
-**Our approach:** `<Name it in one line, e.g. "Trust score = weighted blend of duplicate-proximity, photo EXIF/location consistency and reporter history, with a human-review band between 0.4 and 0.7.">`
-
-*How it works in 3–4 sentences: inputs → logic → output. Mention the specific data you used.*
-
-**Alternative we considered and rejected:** `<e.g. "Mandatory OTP-verified identity for every report.">`
-
-*What it is in 1–2 sentences, and why it looked attractive at first.*
-
-## Q2. Why did we reject it? The trade-off (~150 words)
+## 2. Why We Rejected the Alternative and the Trade-off
 
 | Dimension | Our approach | Rejected alternative |
 |---|---|---|
-| `<e.g. Honest reporting / anonymity>` | `<...>` | `<...>` |
-| `<e.g. Spam resistance>` | `<...>` | `<...>` |
-| `<e.g. Works offline / low-end phones>` | `<...>` | `<...>` |
-| `<e.g. Build effort in 72 h>` | `<...>` | `<...>` |
+| Prioritisation | Multiple operational factors | Mainly report frequency |
+| Verification | Separate verification workflow | Basic submission handling |
+| Traceability | Report → Collection → Processing → Recovery | Primarily complaint tracking |
+| Implementation effort | Higher | Lower |
 
-*In 2–3 sentences: which dimension decided it, and what we consciously gave up by choosing our approach. Name the cost.*
+The deciding factor was operational usefulness. A frequently reported waste location is not necessarily the most urgent collection task. Quantity, waste type, age, location sensitivity and recyclability can change the priority of a report.
 
-> A strong answer names a **cost** you accepted, e.g. "We accept that a coordinated group of real phones can still game the score." A weak answer lists only benefits.
+We therefore accepted greater implementation complexity within the 72-hour hackathon in exchange for demonstrating a complete operational lifecycle. We also consciously accepted limitations: the AI layer is a prototype, collection zones are synthetic demo data, and the current MVP is online-first. We chose to document these limitations rather than present them as production-ready capabilities.
 
-## Q3. What breaks at the scale of all of Mysuru? (~150 words)
+## 3. What Could Break at Mysuru Scale?
 
-*Assume ~65 wards plus surrounding town and gram panchayats, thousands of reports a day, festival spikes (Dasara), and patchy connectivity.*
+If ReBuild Mysore expands across approximately 65 wards and surrounding areas, the main challenges would be increased report volume, image processing, verification workload, connectivity and jurisdiction management.
 
-| What breaks first | Why (with a rough number) | How we'd fix it |
+| What breaks first | Why | How we'd fix it |
 |---|---|---|
-| `<e.g. Duplicate check is O(n) over all open complaints>` | `<~50k open items → seconds per insert>` | `<Geospatial index / geohash bucketing>` |
-| `<e.g. Offline sync conflicts>` | `<...>` | `<...>` |
-| `<e.g. Human review queue>` | `<...>` | `<...>` |
+| API/database workload | Thousands of reports could increase request and storage load | Indexing, caching, object storage and horizontal scaling |
+| AI processing | Large numbers of images could increase latency | Asynchronous queues and optimized inference |
+| Verification workload | More reports would increase duplicate and suspicious cases | Automated pre-filtering and reviewer queues |
+| Jurisdiction management | City-wide deployment requires authoritative boundaries | Integrate verified municipal GIS data |
+| Connectivity | Patchy connectivity can interrupt API-dependent reporting | Offline queues, retry logic and conflict handling |
 
-*One closing line: the single change we would make first, and why.*
+Our first scaling change would be to introduce **reliable asynchronous processing**, so image analysis and other background operations do not block the main reporting and operational workflows.
 
----
-
-### Self-check before exporting
-
-- [ ] Exactly one approach and one clearly rejected alternative named.
-- [ ] At least one cost or downside of **our** approach is admitted.
-- [ ] Q3 contains at least one concrete number or estimate.
-- [ ] Every team member can explain this page without notes.
+**Core lifecycle:**  
+Report → AI Analysis → Verify → Prioritize → Assign → Collect → Process → Recycle → Measure Impact
