@@ -14,7 +14,7 @@ export const NotFound: React.FC = () => {
       <p className="text-xs text-charcoal-500 max-w-sm mt-1 mb-6">
         The requested municipal page does not exist or has been relocated.
       </p>
-      <Link to="/">
+      <Link to="/overview">
         <Button variant="primary" size="md" leftIcon={<Home className="w-4 h-4" />}>
           Return to Overview
         </Button>

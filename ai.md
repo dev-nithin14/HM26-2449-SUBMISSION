@@ -6,23 +6,16 @@
 > Using AI never costs you points. Not being able to explain code you submitted does.
 > Reviewers check this file against your commit history and the AI segment of your video.
 
-<!--
-This file covers two different things. Keep them separate:
-  Section 1: AI tools YOU used while building (ChatGPT, Copilot, Cursor, Claude, v0, ...)
-  Section 3: AI models your PRODUCT uses at runtime (vision model, LLM classifier, ...)
-If you used no AI at all, say so explicitly in the Summary and delete the rest.
--->
-
 ---
 
 ## Summary
 
 | Question | Answer |
 |---|---|
-| Did we use AI tools during development? | `<Yes / No>` |
-| Does our product use AI/ML at runtime? | `<Yes / No>` |
-| Roughly how much of the code was AI-assisted? | `<e.g. ~40% of frontend, ~15% of backend, 0% of routing logic>` |
-| Can every team member explain the AI-assisted code? | `<Yes>` |
+| Did we use AI tools during development? | **Yes** |
+| Does our product use AI/ML at runtime? | **Yes — prototype AI-analysis layer** |
+| Roughly how much of the code was AI-assisted? | **To be finalized by the team after reviewing the codebase** |
+| Can every team member explain the AI-assisted code? | **Yes — team members are responsible for understanding and reviewing submitted code** |
 
 ---
 
@@ -30,56 +23,84 @@ If you used no AI at all, say so explicitly in the Summary and delete the rest.
 
 | Tool | Model / plan | Used by | What we used it for |
 |---|---|---|---|
-| `<ChatGPT>` | `<GPT-x, free>` | `<@handle>` | `<Debugging CORS errors, regex for phone validation>` |
-| `<GitHub Copilot>` | `<...>` | `<@handle, @handle>` | `<Autocomplete in React components>` |
-| `<Cursor / Claude / v0 / ...>` | `<...>` | `<...>` | `<...>` |
+| **Antigravity AI** | AI coding agent | Development team | Application scaffolding, frontend and backend implementation, debugging, iterative development and code assistance |
+| **ChatGPT** | GPT model | Development team | Architecture discussions, technical problem solving, debugging, development planning and documentation assistance |
+
+---
 
 ## 2. Where AI Helped in the Codebase
 
 | Area / file | Level of AI help | What a human did |
 |---|---|---|
-| `src/<frontend/components/>` | `<High: scaffolded by v0>` | `<Rewrote state handling, added offline queue>` |
-| `src/<api/routes.py>` | `<Medium: Copilot suggestions>` | `<Designed endpoints, wrote validation>` |
-| `src/<routing/engine.py>` | `<None>` | `<Written by hand, core logic>` |
-| `<README / docs>` | `<...>` | `<...>` |
+| `src/frontend/` | **High** | Team reviewed the generated implementation, tested the UI and modified it according to the project requirements |
+| `src/backend/` | **High** | Team reviewed backend logic, APIs and services, tested the implementation and made required changes |
+| Repository / data-access layer | **High** | Team reviewed the repository abstraction and verified how application data flows through the backend |
+| AI-analysis layer | **High** | Team defined the intended analysis workflow, reviewed the implementation and tested the resulting behavior |
+| Documentation | **Medium** | Team provided the project-specific information, reviewed generated content and made final decisions |
 
-**Commit convention (optional, recommended):** commits containing substantial AI-generated code are tagged `[ai]` in the message, e.g. `feat: ward status page [ai]`.
+### Human responsibility
 
-## 3. AI Inside the Product (runtime)
+AI-generated code was treated as development assistance rather than automatically correct code.
 
-<!-- Delete this section if your product uses no AI/ML at runtime. -->
-
-| Model / API | What it does in our product | Hosted where | Trained / fine-tuned by us? |
-|---|---|---|---|
-| `<YOLOv8n>` | `<Detects overflowing bins in photos>` | `<On server / on device>` | `<Fine-tuned on 300 labelled images>` |
-| `<LLM API>` | `<Classifies complaint text into issue types>` | `<Provider API>` | `<No, prompt only>` |
-
-- **Accuracy we measured:** `<e.g. 82% precision on 50 held-out images>` (or "not measured yet")
-- **What happens when the model is wrong:** `<fallback, human review, confidence threshold>`
-- **Does it work offline?** `<...>`
-- **Citizen data sent to third parties:** `<none / what, and why>`
-- **Cost at city scale:** `<rough estimate, or "unknown">`
-
-## 4. Key Prompts (optional, max 5)
-
-<!-- Only prompts that shaped a real design or code decision. Not a full chat log. -->
-
-| # | Prompt (short) | What we kept | What we changed or rejected |
-|---|---|---|---|
-| 1 | `<"Suggest a schema for complaints with geo-dedup">` | `<Table layout>` | `<Replaced lat/lng floats with PostGIS geography>` |
-
-## 5. How We Verified AI Output
-
-- `<e.g. Every AI-generated function was run against our seed data before merging>`
-- `<e.g. Rejected suggestions that stored photos in the database as base64>`
-- `<Example of a bug an AI tool introduced and how we caught it>`
-
-## 6. What We Deliberately Did *Not* Use AI For
-
-- `<e.g. The Decision Log — written by the team in our own words>`
-- `<e.g. The jurisdiction routing rules>`
+The team reviewed, modified and tested the implementation and remained responsible for the final architecture, functionality and submitted code.
 
 ---
 
-**Declaration:** We confirm this disclosure is complete, and every team member can explain the code listed above.
-**Signed:** `<Team Leader name>` on behalf of `<Team Name>` · `<date>`
+## 3. AI Inside the Product (runtime)
+
+| Model / API | What it does in our product | Hosted where | Trained / fine-tuned by us? |
+|---|---|---|---|
+| **Prototype AI-analysis service** | Analyzes construction-waste reports using factors such as waste composition, recyclability, image quality, contamination, duplicate probability and confidence | Application backend / prototype service | **No custom model training in the current MVP** |
+
+- **Accuracy we measured:** Not measured as a production ML model.
+- **What happens when the model is wrong:** The AI output is treated as an analysis/recommendation within the workflow and is not presented as a guaranteed decision.
+- **Does it work offline?** The current AI-analysis capability should not be considered a production offline ML system.
+- **Citizen data sent to third parties:** No production third-party AI data-sharing claim is made unless an external AI provider is explicitly configured.
+- **Cost at city scale:** Not measured for the current prototype.
+
+### Important prototype disclosure
+
+The current AI-analysis implementation is a **prototype layer** intended to demonstrate how AI-assisted waste analysis can participate in the ReBuild Mysore workflow.
+
+It should not be interpreted as a production-validated computer-vision model or as a claim of measured real-world classification accuracy.
+
+---
+
+## 4. Key Prompts (optional)
+
+The team used AI-assisted prompts for tasks including:
+
+1. Application architecture and repository-layer design.
+2. Frontend and backend implementation assistance.
+3. Debugging and resolving implementation issues.
+4. Database and persistence architecture discussions.
+5. Documentation and submission preparation.
+
+The final implementation was reviewed and adapted by the team rather than being accepted blindly.
+
+---
+
+## 5. How We Verified AI Output
+
+- AI-generated implementation was run and tested during development.
+- Frontend and backend functionality was tested through the application's actual workflow.
+- Generated code was reviewed and modified when it did not match project requirements.
+- API behavior and frontend/backend integration were tested during development.
+- The team retained responsibility for understanding the submitted implementation.
+- AI suggestions were not treated as authoritative when they conflicted with the application's architecture or requirements.
+
+---
+
+## 6. What We Deliberately Did Not Use AI For
+
+- Final team decisions and project ownership.
+- Final evaluation of whether the solution meets the hackathon problem.
+- Blind acceptance of generated code.
+- Final testing and verification of the submitted application.
+- Claims about real-world impact or production performance without supporting evidence.
+
+---
+
+**Declaration:** We confirm that this disclosure represents the team's AI-assisted development process and that the team is responsible for understanding and explaining the submitted implementation.
+
+**Signed:** `Team Leader name` on behalf of `Team Name` · `19 September 2026`

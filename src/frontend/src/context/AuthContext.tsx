@@ -2,11 +2,25 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, UserRole } from '../types';
 import { authApi } from '../api/client';
 
+const DEMO_SESSION_VERSION = '2';
+
+const hasValidDemoSession = () => {
+  return (
+    (localStorage.getItem('rebuild_demo_authenticated') === 'true' &&
+      localStorage.getItem('rebuild_demo_session_version') === DEMO_SESSION_VERSION) ||
+    (sessionStorage.getItem('rebuild_demo_authenticated') === 'true' &&
+      sessionStorage.getItem('rebuild_demo_session_version') === DEMO_SESSION_VERSION)
+  );
+};
+
 interface AuthContextType {
   currentUser: UserProfile | null;
   activeRole: UserRole;
   availableUsers: UserProfile[];
   isLoading: boolean;
+  isAuthenticated: boolean;
+  loginDemo: (role: UserRole, rememberMe: boolean) => Promise<void>;
+  logout: () => void;
   switchRole: (role: UserRole) => Promise<void>;
   switchUser: (userId: string) => Promise<void>;
 }
@@ -17,6 +31,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [activeRole, setActiveRole] = useState<UserRole>(() => {
     return (localStorage.getItem('rebuild_demo_role') as UserRole) || 'CITIZEN';
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return hasValidDemoSession();
   });
   const [availableUsers, setAvailableUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -30,12 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const savedRole = (localStorage.getItem('rebuild_demo_role') as UserRole) || 'CITIZEN';
         const savedUserId = localStorage.getItem('rebuild_demo_user_id');
 
-        let matched = users.find((u) => u.id === savedUserId);
-        if (!matched) {
+        let matched = isAuthenticated ? users.find((u) => u.id === savedUserId) : undefined;
+        if (isAuthenticated && !matched) {
           matched = users.find((u) => u.role === savedRole) || users[0];
         }
 
-        if (matched) {
+        if (matched && isAuthenticated) {
           setCurrentUser(matched);
           setActiveRole(matched.role);
           localStorage.setItem('rebuild_demo_role', matched.role);
@@ -50,13 +67,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           role: 'CITIZEN',
           organization: 'Resident, Kuvempunagar'
         };
-        setCurrentUser(fallback);
+        if (isAuthenticated) {
+          setCurrentUser(fallback);
+        }
       } finally {
         setIsLoading(false);
       }
     }
     initAuth();
   }, []);
+
+  const loginDemo = async (role: UserRole, rememberMe: boolean) => {
+    await switchRole(role);
+    setIsAuthenticated(true);
+    const storage = rememberMe ? localStorage : sessionStorage;
+    const otherStorage = rememberMe ? sessionStorage : localStorage;
+    storage.setItem('rebuild_demo_authenticated', 'true');
+    storage.setItem('rebuild_demo_session_version', DEMO_SESSION_VERSION);
+    otherStorage.removeItem('rebuild_demo_authenticated');
+    otherStorage.removeItem('rebuild_demo_session_version');
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('rebuild_demo_authenticated');
+    localStorage.removeItem('rebuild_demo_session_version');
+    localStorage.removeItem('rebuild_demo_role');
+    localStorage.removeItem('rebuild_demo_user_id');
+    sessionStorage.removeItem('rebuild_demo_authenticated');
+    sessionStorage.removeItem('rebuild_demo_session_version');
+  };
 
   const switchRole = async (newRole: UserRole) => {
     setIsLoading(true);
@@ -103,6 +144,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeRole,
         availableUsers,
         isLoading,
+        isAuthenticated,
+        loginDemo,
+        logout,
         switchRole,
         switchUser
       }}

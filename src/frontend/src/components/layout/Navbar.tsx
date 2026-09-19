@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { notificationsApi } from '../../api/client';
 import { NotificationItem } from '../../types';
+import { UserRole } from '../../types';
 import {
   Recycle,
   PlusCircle,
@@ -19,6 +20,49 @@ import {
   Menu,
   X
 } from 'lucide-react';
+
+type NavigationItem = {
+  label: string;
+  path: string;
+  icon?: React.ReactNode;
+  iconClassName?: string;
+};
+
+const roleNavigation: Record<UserRole, NavigationItem[]> = {
+  CITIZEN: [
+    { label: 'Overview', path: '/overview' },
+    { label: 'Dashboard', path: '/citizen' },
+    { label: 'Recycled Materials', path: '/materials' },
+    { label: 'Impact', path: '/impact' }
+  ],
+  BUILDER: [
+    { label: 'Overview', path: '/overview' },
+    { label: 'Dashboard', path: '/citizen' },
+    { label: 'Recycled Materials', path: '/materials' },
+    { label: 'Impact', path: '/impact' }
+  ],
+  COLLECTION_TEAM: [
+    { label: 'Overview', path: '/overview' },
+    { label: 'Collection Assignments', path: '/collection', icon: <Truck className="w-4 h-4" />, iconClassName: 'text-forest-600' },
+    { label: 'City Debris', path: '/city-debris', icon: <Truck className="w-4 h-4" />, iconClassName: 'text-charcoal-600' },
+    { label: 'City Debris Map', path: '/admin/map', icon: <MapPin className="w-4 h-4" />, iconClassName: 'text-terracotta-600' }
+  ],
+  PROCESSING_TEAM: [
+    { label: 'Overview', path: '/overview' },
+    { label: 'Processing Batch', path: '/processing', icon: <Cog className="w-4 h-4" />, iconClassName: 'text-forest-600' },
+    { label: 'Recycled Products', path: '/materials', icon: <Layers className="w-4 h-4" />, iconClassName: 'text-terracotta-600' },
+    { label: 'Ecological Impact', path: '/impact', icon: <BarChart3 className="w-4 h-4" />, iconClassName: 'text-forest-600' }
+  ],
+  ADMIN: [
+    { label: 'Overview', path: '/overview' },
+    { label: 'Command Centre', path: '/admin', icon: <Shield className="w-4 h-4" />, iconClassName: 'text-forest-700' },
+    { label: 'GIS Map', path: '/admin/map', icon: <MapPin className="w-4 h-4" />, iconClassName: 'text-terracotta-600' },
+    { label: 'Hotspots', path: '/admin/hotspots', icon: <Flame className="w-4 h-4" />, iconClassName: 'text-amber-600' },
+    { label: 'Collection', path: '/collection', icon: <Truck className="w-4 h-4" />, iconClassName: 'text-charcoal-600' },
+    { label: 'Processing', path: '/processing', icon: <Cog className="w-4 h-4" />, iconClassName: 'text-charcoal-600' },
+    { label: 'Impact', path: '/impact' }
+  ]
+};
 
 export const Navbar: React.FC = () => {
   const { activeRole } = useAuth();
@@ -71,7 +115,27 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) =>
+    location.pathname === path || (path === '/overview' && location.pathname === '/');
+
+  const navigationItems = roleNavigation[activeRole];
+
+  const renderNavigationItem = (item: NavigationItem, mobile = false) => (
+    <Link
+      key={item.path + item.label}
+      to={item.path}
+      className={`${mobile ? 'px-3 py-2.5' : 'px-3 py-1.5'} rounded-lg transition flex items-center gap-1.5 ${
+        isActive(item.path)
+          ? 'text-forest-800 bg-forest-50 font-semibold'
+          : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
+      }`}
+    >
+      {item.icon && React.cloneElement(item.icon as React.ReactElement, {
+        className: `w-4 h-4 ${item.iconClassName || ''}`
+      })}
+      {item.label}
+    </Link>
+  );
 
   return (
     <nav className="bg-white/95 backdrop-blur-md border-b border-sand-200 sticky top-[33px] z-40">
@@ -79,7 +143,7 @@ export const Navbar: React.FC = () => {
         <div className="flex justify-between h-16 items-center gap-2">
           {/* Brand Logo */}
           <div className="flex items-center gap-8 min-w-0">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+            <Link to="/overview" className="flex items-center gap-2 sm:gap-3 group min-w-0">
               <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-br from-forest-700 to-forest-900 text-white flex items-center justify-center shadow-md shadow-forest-900/10 group-hover:scale-105 transition-transform">
                 <Recycle className="w-6 h-6 text-forest-300" />
               </div>
@@ -98,188 +162,8 @@ export const Navbar: React.FC = () => {
               </div>
             </Link>
 
-            {/* Role-Specific Navigation Links */}
             <div className="hidden md:flex items-center gap-1 text-sm font-medium">
-              <Link
-                to="/overview"
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  isActive('/overview')
-                    ? 'text-forest-800 bg-forest-50 font-semibold'
-                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                }`}
-              >
-                Overview
-              </Link>
-
-              {(activeRole === 'CITIZEN' || activeRole === 'BUILDER') && (
-                <>
-                  <Link
-                    to="/citizen"
-                    className={`px-3 py-1.5 rounded-lg transition ${
-                      isActive('/citizen')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/materials"
-                    className={`px-3 py-1.5 rounded-lg transition ${
-                      isActive('/materials')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    Recycled Materials
-                  </Link>
-                  <Link
-                    to="/impact"
-                    className={`px-3 py-1.5 rounded-lg transition ${
-                      isActive('/impact')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    Impact
-                  </Link>
-                </>
-              )}
-
-              {activeRole === 'COLLECTION_TEAM' && (
-                <>
-                  <Link
-                    to="/collection"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/collection')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Truck className="w-4 h-4 text-forest-600" />
-                    Collection Assignments
-                  </Link>
-                  <Link
-                    to="/admin/map"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/admin/map')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <MapPin className="w-4 h-4 text-terracotta-600" />
-                    City Debris Map
-                  </Link>
-                </>
-              )}
-
-              {activeRole === 'PROCESSING_TEAM' && (
-                <>
-                  <Link
-                    to="/processing"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/processing')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Cog className="w-4 h-4 text-forest-600" />
-                    Processing Batches
-                  </Link>
-                  <Link
-                    to="/materials"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/materials')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Layers className="w-4 h-4 text-terracotta-600" />
-                    Recycled Products
-                  </Link>
-                  <Link
-                    to="/impact"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/impact')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <BarChart3 className="w-4 h-4 text-forest-600" />
-                    Ecological Impact
-                  </Link>
-                </>
-              )}
-
-              {activeRole === 'ADMIN' && (
-                <>
-                  <Link
-                    to="/admin"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/admin')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Shield className="w-4 h-4 text-forest-700" />
-                    Command Center
-                  </Link>
-                  <Link
-                    to="/admin/map"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/admin/map')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <MapPin className="w-4 h-4 text-terracotta-600" />
-                    GIS Map
-                  </Link>
-                  <Link
-                    to="/admin/hotspots"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/admin/hotspots')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Flame className="w-4 h-4 text-amber-600" />
-                    Hotspots
-                  </Link>
-                  <Link
-                    to="/collection"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/collection')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Truck className="w-4 h-4 text-charcoal-600" />
-                    Collections
-                  </Link>
-                  <Link
-                    to="/processing"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/processing')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    <Cog className="w-4 h-4 text-charcoal-600" />
-                    Processing
-                  </Link>
-                  <Link
-                    to="/impact"
-                    className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 ${
-                      isActive('/impact')
-                        ? 'text-forest-800 bg-forest-50 font-semibold'
-                        : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                    }`}
-                  >
-                    Impact
-                  </Link>
-                </>
-              )}
+              {navigationItems.map((item) => renderNavigationItem(item))}
             </div>
           </div>
 
@@ -393,46 +277,7 @@ export const Navbar: React.FC = () => {
         {showMobileMenu && (
           <div className="md:hidden border-t border-sand-200 py-3">
             <div className="grid gap-1 text-sm font-medium">
-              <Link
-                to="/overview"
-                className={`px-3 py-2.5 rounded-lg transition ${
-                  isActive('/overview')
-                    ? 'text-forest-800 bg-forest-50 font-semibold'
-                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                }`}
-              >
-                Overview
-              </Link>
-              <Link
-                to="/citizen"
-                className={`px-3 py-2.5 rounded-lg transition ${
-                  isActive('/citizen')
-                    ? 'text-forest-800 bg-forest-50 font-semibold'
-                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/materials"
-                className={`px-3 py-2.5 rounded-lg transition ${
-                  isActive('/materials')
-                    ? 'text-forest-800 bg-forest-50 font-semibold'
-                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                }`}
-              >
-                Recycled Materials
-              </Link>
-              <Link
-                to="/impact"
-                className={`px-3 py-2.5 rounded-lg transition ${
-                  isActive('/impact')
-                    ? 'text-forest-800 bg-forest-50 font-semibold'
-                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
-                }`}
-              >
-                Impact
-              </Link>
+              {navigationItems.map((item) => renderNavigationItem(item, true))}
               <Link
                 to="/report"
                 className="mt-2 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-forest-700 text-white font-semibold"
