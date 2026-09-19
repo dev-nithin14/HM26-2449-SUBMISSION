@@ -29,6 +29,7 @@ export const App: React.FC = () => {
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/overview" element={<LandingPage />} />
               <Route path="/citizen" element={<CitizenDashboard />} />
               <Route path="/report" element={<ReportWasteWizard />} />
               <Route path="/reports/:id" element={<ReportDetailPage />} />

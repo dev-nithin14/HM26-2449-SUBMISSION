@@ -15,7 +15,9 @@ import {
   Shield,
   Layers,
   BarChart3,
-  CheckCheck
+  CheckCheck,
+  Menu,
+  X
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -25,6 +27,7 @@ export const Navbar: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const fetchNotifs = async () => {
     try {
@@ -41,6 +44,10 @@ export const Navbar: React.FC = () => {
     const interval = setInterval(fetchNotifs, 10000);
     return () => clearInterval(interval);
   }, [activeRole]);
+
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [location.pathname]);
 
   const handleMarkAsRead = async (id: string) => {
     try {
@@ -69,23 +76,23 @@ export const Navbar: React.FC = () => {
   return (
     <nav className="bg-white/95 backdrop-blur-md border-b border-sand-200 sticky top-[33px] z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-16 items-center gap-2">
           {/* Brand Logo */}
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-forest-700 to-forest-900 text-white flex items-center justify-center shadow-md shadow-forest-900/10 group-hover:scale-105 transition-transform">
+          <div className="flex items-center gap-8 min-w-0">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-gradient-to-br from-forest-700 to-forest-900 text-white flex items-center justify-center shadow-md shadow-forest-900/10 group-hover:scale-105 transition-transform">
                 <Recycle className="w-6 h-6 text-forest-300" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-lg font-bold tracking-tight text-forest-950 font-display">
+                  <span className="text-base sm:text-lg font-bold tracking-tight text-forest-950 font-display">
                     ReBuild
                   </span>
-                  <span className="text-lg font-semibold tracking-tight text-terracotta-600 font-display">
+                  <span className="text-base sm:text-lg font-semibold tracking-tight text-terracotta-600 font-display">
                     Mysore
                   </span>
                 </div>
-                <p className="text-[10px] text-charcoal-500 font-medium tracking-wide uppercase">
+                <p className="hidden sm:block text-[10px] text-charcoal-500 font-medium tracking-wide uppercase">
                   Circular C&D Waste Platform
                 </p>
               </div>
@@ -94,9 +101,9 @@ export const Navbar: React.FC = () => {
             {/* Role-Specific Navigation Links */}
             <div className="hidden md:flex items-center gap-1 text-sm font-medium">
               <Link
-                to="/"
+                to="/overview"
                 className={`px-3 py-1.5 rounded-lg transition ${
-                  isActive('/')
+                  isActive('/overview')
                     ? 'text-forest-800 bg-forest-50 font-semibold'
                     : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
                 }`}
@@ -277,7 +284,16 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action Icons & Report CTA */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            <button
+              onClick={() => setShowMobileMenu((prev) => !prev)}
+              className="md:hidden p-2 rounded-xl text-charcoal-700 hover:text-forest-700 hover:bg-sand-100 transition"
+              aria-label={showMobileMenu ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={showMobileMenu}
+            >
+              {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
             {/* Notification Bell */}
             <div className="relative">
               <button
@@ -366,13 +382,67 @@ export const Navbar: React.FC = () => {
             {/* Quick Report Waste Button */}
             <Link
               to="/report"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold shadow-sm shadow-forest-900/20 hover:shadow transition active:scale-95"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold shadow-sm shadow-forest-900/20 hover:shadow transition active:scale-95"
             >
               <PlusCircle className="w-4 h-4 text-forest-300" />
               <span>Report Waste</span>
             </Link>
           </div>
         </div>
+
+        {showMobileMenu && (
+          <div className="md:hidden border-t border-sand-200 py-3">
+            <div className="grid gap-1 text-sm font-medium">
+              <Link
+                to="/overview"
+                className={`px-3 py-2.5 rounded-lg transition ${
+                  isActive('/overview')
+                    ? 'text-forest-800 bg-forest-50 font-semibold'
+                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
+                }`}
+              >
+                Overview
+              </Link>
+              <Link
+                to="/citizen"
+                className={`px-3 py-2.5 rounded-lg transition ${
+                  isActive('/citizen')
+                    ? 'text-forest-800 bg-forest-50 font-semibold'
+                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/materials"
+                className={`px-3 py-2.5 rounded-lg transition ${
+                  isActive('/materials')
+                    ? 'text-forest-800 bg-forest-50 font-semibold'
+                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
+                }`}
+              >
+                Recycled Materials
+              </Link>
+              <Link
+                to="/impact"
+                className={`px-3 py-2.5 rounded-lg transition ${
+                  isActive('/impact')
+                    ? 'text-forest-800 bg-forest-50 font-semibold'
+                    : 'text-charcoal-700 hover:text-forest-700 hover:bg-sand-100'
+                }`}
+              >
+                Impact
+              </Link>
+              <Link
+                to="/report"
+                className="mt-2 inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-forest-700 text-white font-semibold"
+              >
+                <PlusCircle className="w-4 h-4 text-forest-300" />
+                Report Waste
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

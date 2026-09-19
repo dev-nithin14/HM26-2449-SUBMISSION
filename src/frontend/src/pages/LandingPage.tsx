@@ -49,7 +49,7 @@ export const LandingPage: React.FC = () => {
             <span>Circular Construction Waste Initiative for Mysuru</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-charcoal-900 tracking-tight font-display max-w-4xl mx-auto leading-[1.1]">
+          <h1 className="text-3xl sm:text-6xl lg:text-7xl font-extrabold text-charcoal-900 tracking-tight font-display max-w-4xl mx-auto leading-[1.1] break-words">
             Turning Construction Waste into <span className="text-forest-700 underline decoration-terracotta-400 decoration-wavy decoration-2">Community Value</span>.
           </h1>
 
@@ -61,14 +61,14 @@ export const LandingPage: React.FC = () => {
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/report"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white font-semibold shadow-lg shadow-forest-900/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 text-base active:scale-95"
+              className="w-full max-w-sm sm:w-auto px-8 py-3.5 rounded-xl bg-forest-700 hover:bg-forest-800 text-white font-semibold shadow-lg shadow-forest-900/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 text-base active:scale-95"
             >
               <span>Report Waste</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/impact"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-sand-50 text-charcoal-800 font-semibold border border-sand-300 shadow-sm hover:shadow transition flex items-center justify-center gap-2 text-base"
+              className="w-full max-w-sm sm:w-auto px-8 py-3.5 rounded-xl bg-white hover:bg-sand-50 text-charcoal-800 font-semibold border border-sand-300 shadow-sm hover:shadow transition flex items-center justify-center gap-2 text-base"
             >
               <span>Explore Impact</span>
             </Link>
