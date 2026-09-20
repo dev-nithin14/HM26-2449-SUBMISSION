@@ -10,7 +10,7 @@ The project is maintained in the GitHub repository:
 
 A deployed version of the MVP is also available at:
 
-`https://hm-26-2449-submission.vercel.app/`
+https://frontend-black-two-20.vercel.app/
 
 The final MVP uses **Supabase** as the persistent backend and database layer, including Supabase Authentication and PostgreSQL-based data storage.
 
@@ -241,7 +241,7 @@ The Phase 1 MVP is deployed using Vercel.
 
 Live application:
 
-`https://hm-26-2449-submission.vercel.app/`
+https://frontend-black-two-20.vercel.app/
 
 The production deployment uses the project's configured environment and Supabase connection.
 

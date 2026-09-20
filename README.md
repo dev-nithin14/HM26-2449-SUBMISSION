@@ -3,6 +3,14 @@
 > **HackMysuru 1.0 · Phase 1 · Civic Governance & Clean Mysuru**  
 > **Team `HM26-2449`**
 
+## 🚀 Live MVP
+
+**Frontend:** https://frontend-black-two-20.vercel.app/
+
+**Backend API:** https://rebuild-mysore-backend-44pn.onrender.com
+
+**Health Check:** https://rebuild-mysore-backend-44pn.onrender.com/api/health
+
 | 📎 Submission links | 📋 Templates | 🏗️ Architecture | 🛡️ Hard constraints | ⚙️ Setup | 🤖 AI usage | ⚠️ Limitations |
 |---|---|---|---|---|---|---|
 | [resource.md](./resource.md) | [resource-templates/](./resource-templates/) | [docs/architecture.md](./docs/architecture.md) | [docs/constraints.md](./docs/constraints.md) | [docs/setup.md](./docs/setup.md) | [ai.md](./ai.md) | [docs/limitations.md](./docs/limitations.md) |
