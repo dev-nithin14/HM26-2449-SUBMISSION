@@ -76,7 +76,7 @@ export class VerificationService {
       id: `ver-${uuidv4().substring(0, 8)}`,
       report_id: report.id,
       status: finalStatus,
-      verified_by: adminId || 'usr-adm-01',
+      verified_by: adminId || 'a0000000-0000-0000-0000-000000000001',
       verifier_name: adminName || 'Pooja Kulkarni (MCC Nodal Officer)',
       notes: adminNotes || (detectedDuplicateId ? `Possible duplicate of ${detectedDuplicateId}` : 'Verified valid C&D waste accumulation site.'),
       flags,

@@ -7,23 +7,21 @@ import {
   INotificationRepository
 } from './interfaces/index.js';
 import {
-  MockUserRepository,
-  MockReportRepository,
-  MockCollectionRepository,
-  MockProcessingRepository,
-  MockAnalyticsRepository,
-  MockNotificationRepository
-} from './mock/index.js';
+  SupabaseUserRepository,
+  SupabaseReportRepository,
+  SupabaseCollectionRepository,
+  SupabaseProcessingRepository,
+  SupabaseAnalyticsRepository,
+  SupabaseNotificationRepository
+} from './supabase/index.js';
 
-// Central Repository Container
-// In the current Hackathon build, Mock implementations provide realistic in-memory state.
-// When Developer 2 connects Supabase, this container will instantiate SupabaseUserRepository,
-// SupabaseReportRepository, etc., without requiring any changes to Controllers or Services.
-export const userRepository: IUserRepository = new MockUserRepository();
-export const reportRepository: IReportRepository = new MockReportRepository();
-export const collectionRepository: ICollectionRepository = new MockCollectionRepository();
-export const processingRepository: IProcessingRepository = new MockProcessingRepository();
-export const analyticsRepository: IAnalyticsRepository = new MockAnalyticsRepository();
-export const notificationRepository: INotificationRepository = new MockNotificationRepository();
+// Central Repository Container backed strictly by Supabase PostgreSQL.
+// Silent mock fallback is completely disabled. Supabase is the sole source of truth.
+export const userRepository: IUserRepository = new SupabaseUserRepository();
+export const reportRepository: IReportRepository = new SupabaseReportRepository();
+export const collectionRepository: ICollectionRepository = new SupabaseCollectionRepository();
+export const processingRepository: IProcessingRepository = new SupabaseProcessingRepository();
+export const analyticsRepository: IAnalyticsRepository = new SupabaseAnalyticsRepository();
+export const notificationRepository: INotificationRepository = new SupabaseNotificationRepository();
 
 export * from './interfaces/index.js';

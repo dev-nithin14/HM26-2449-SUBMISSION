@@ -18,6 +18,7 @@ import {
   FileText,
   MapPin
 } from 'lucide-react';
+import { useRealtimeSync } from '../../hooks/useRealtimeSync';
 
 export const CitizenDashboard: React.FC = () => {
   const { currentUser, activeRole } = useAuth();
@@ -27,24 +28,33 @@ export const CitizenDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
-      try {
-        const [reps, imp] = await Promise.all([
-          reportsApi.getAll({ search: searchQuery, status: statusFilter || undefined }),
-          analyticsApi.getImpact()
-        ]);
-        setReports(reps);
-        setImpact(imp);
-      } catch (err) {
-        console.error('Failed to load citizen dashboard data', err);
-      } finally {
-        setIsLoading(false);
+  const loadData = async () => {
+    try {
+      const filters: Record<string, string | undefined> = {
+        search: searchQuery || undefined,
+        status: statusFilter || undefined
+      };
+      if (currentUser?.id) {
+        filters.citizen_id = currentUser.id;
       }
+      const [reps, imp] = await Promise.all([
+        reportsApi.getAll(filters),
+        analyticsApi.getImpact()
+      ]);
+      setReports(reps);
+      setImpact(imp);
+    } catch (err) {
+      console.error('Failed to load citizen dashboard data', err);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useRealtimeSync(['reports'], loadData);
+
+  useEffect(() => {
     loadData();
-  }, [searchQuery, statusFilter, activeRole]);
+  }, [searchQuery, statusFilter, activeRole, currentUser?.id]);
 
   // Compute citizen specific KPIs
   const activeCount = reports.filter(

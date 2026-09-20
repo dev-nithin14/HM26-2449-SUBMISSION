@@ -1,46 +1,61 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserProfile, UserRole } from '../types/index.js';
 import { userRepository } from '../repositories/index.js';
+import { supabase } from '../lib/supabase.js';
 
 export interface AuthenticatedRequest extends Request {
   user?: UserProfile;
 }
 
+/**
+ * Real Supabase JWT Bearer Authentication Middleware.
+ * Replaces simulated demo headers with cryptographic token validation via Supabase Auth.
+ * Unauthenticated requests proceed without req.user; protected routes enforce auth via requireAuth / requireRole.
+ */
 export async function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    // In mock/development mode, accept header 'x-user-id' or 'x-demo-role'
-    // This provides a seamless demo experience while maintaining standard middleware architecture.
-    const userIdHeader = req.headers['x-user-id'] as string;
-    const roleHeader = (req.headers['x-demo-role'] as string)?.toUpperCase() as UserRole;
+    const authHeader = req.headers['authorization'] || (req.headers['Authorization'] as string);
 
-    if (userIdHeader) {
-      const found = await userRepository.findById(userIdHeader);
-      if (found) {
-        req.user = found;
-        return next();
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7).trim();
+
+      if (token) {
+        const { data, error } = await supabase.auth.getUser(token);
+
+        if (!error && data?.user) {
+          const profile = await userRepository.findById(data.user.id);
+          if (profile) {
+            req.user = profile;
+          }
+        }
       }
     }
 
-    if (roleHeader) {
-      const allUsers = await userRepository.findAll();
-      const match = allUsers.find((u) => u.role === roleHeader);
-      if (match) {
-        req.user = match;
-        return next();
-      }
-    }
-
-    // Default fallback demo user: Aarav Sharma (Citizen)
-    const defaultUser = await userRepository.findById('usr-cit-01');
-    if (defaultUser) {
-      req.user = defaultUser;
-    }
     next();
   } catch (err) {
     next(err);
   }
 }
 
+/**
+ * Ensures request contains a valid authenticated Supabase session
+ */
+export function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Authentication required. Please sign in with a valid Supabase account.'
+      }
+    });
+  }
+  next();
+}
+
+/**
+ * Enforces role-based access control against the user's authentic database role
+ */
 export function requireRole(allowedRoles: UserRole[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -48,7 +63,7 @@ export function requireRole(allowedRoles: UserRole[]) {
         success: false,
         error: {
           code: 'UNAUTHORIZED',
-          message: 'Authentication required'
+          message: 'Authentication required. Please sign in with a valid Supabase account.'
         }
       });
     }
@@ -58,7 +73,7 @@ export function requireRole(allowedRoles: UserRole[]) {
         success: false,
         error: {
           code: 'FORBIDDEN',
-          message: `Access denied. Requires one of: ${allowedRoles.join(', ')}`
+          message: `Access denied. Current role '${req.user.role}' is not authorized. Requires one of: ${allowedRoles.join(', ')}`
         }
       });
     }

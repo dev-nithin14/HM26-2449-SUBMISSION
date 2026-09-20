@@ -16,6 +16,7 @@ import {
   Sparkles,
   ExternalLink
 } from 'lucide-react';
+import { useRealtimeSync, triggerLocalSync } from '../../hooks/useRealtimeSync';
 
 export const ProcessingDashboard: React.FC = () => {
   const [batches, setBatches] = useState<ProcessingBatch[]>([]);
@@ -49,7 +50,6 @@ export const ProcessingDashboard: React.FC = () => {
   const [intendedApp, setIntendedApp] = useState('Pedestrian pathways & heritage park walkways in Mysuru');
 
   const loadAll = async () => {
-    setIsLoading(true);
     try {
       const [batchList, prodList, repList] = await Promise.all([
         processingApi.getBatches(),
@@ -65,6 +65,8 @@ export const ProcessingDashboard: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useRealtimeSync(['processing_batches', 'reports'], loadAll);
 
   useEffect(() => {
     loadAll();

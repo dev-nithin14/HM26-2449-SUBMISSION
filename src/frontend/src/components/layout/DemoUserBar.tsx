@@ -23,14 +23,19 @@ export const DemoUserBar: React.FC = () => {
           <span className="truncate text-xs font-semibold text-white">
             {currentUser?.name || 'Authenticated user'}
           </span>
-          <span className="text-[11px] text-sand-400">{roleLabels[activeRole]}</span>
+          <span className="rounded bg-forest-900/80 px-1.5 py-0.5 text-[10px] font-medium text-forest-200 border border-forest-700/50">
+            {roleLabels[activeRole]}
+          </span>
+          {currentUser?.email && (
+            <span className="hidden sm:inline text-[11px] text-sand-400 truncate">({currentUser.email})</span>
+          )}
         </div>
 
         <div className="shrink-0">
           <button
             type="button"
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               navigate('/', { replace: true });
             }}
             className="ml-1 inline-flex shrink-0 items-center gap-1 rounded border border-charcoal-700/60 bg-charcoal-800 px-2.5 py-1 text-xs font-medium text-sand-200 transition hover:bg-charcoal-700 hover:text-white"

@@ -33,6 +33,7 @@ import {
   TrendingUp,
   RefreshCw
 } from 'lucide-react';
+import { useRealtimeSync, triggerLocalSync } from '../../hooks/useRealtimeSync';
 
 export const AdminDashboard: React.FC = () => {
   const [overview, setOverview] = useState<any>(null);
@@ -56,7 +57,6 @@ export const AdminDashboard: React.FC = () => {
   const [priorityModalReport, setPriorityModalReport] = useState<Report | null>(null);
 
   const loadData = async () => {
-    setIsLoading(true);
     try {
       const [ov, tr, wd, repList, teamList] = await Promise.all([
         analyticsApi.getOverview(),
@@ -76,6 +76,8 @@ export const AdminDashboard: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useRealtimeSync(['reports', 'collection_assignments', 'processing_batches'], loadData);
 
   useEffect(() => {
     loadData();

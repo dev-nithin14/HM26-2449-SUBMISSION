@@ -11,17 +11,17 @@ import {
   NotificationItem,
   UserRole
 } from '../types';
+import { supabase } from '../lib/supabase';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const currentRole = localStorage.getItem('rebuild_demo_role') || 'CITIZEN';
-  const currentUserId = localStorage.getItem('rebuild_demo_user_id') || 'usr-cit-01';
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'x-demo-role': currentRole,
-    'x-user-id': currentUserId,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers as Record<string, string>)
   };
 
@@ -43,11 +43,11 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const authApi = {
   getMe: () => request<UserProfile>('/auth/me'),
-  getUsers: () => request<UserProfile[]>('/auth/users'),
-  switchUser: (role?: UserRole, userId?: string) =>
-    request<UserProfile>('/auth/switch-demo-user', {
+  getStaff: () => request<UserProfile[]>('/auth/staff'),
+  inviteStaff: (data: { email: string; name: string; role: 'COLLECTION_TEAM' | 'PROCESSING_TEAM'; team_id?: string; phone?: string; organization?: string }) =>
+    request<UserProfile>('/auth/invite-staff', {
       method: 'POST',
-      body: JSON.stringify({ role, userId })
+      body: JSON.stringify(data)
     })
 };
 

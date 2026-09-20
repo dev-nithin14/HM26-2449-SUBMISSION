@@ -31,32 +31,32 @@ export interface ReportFilterOptions {
 export interface IReportRepository {
   findById(id: string): Promise<Report | null>;
   findAll(filters?: ReportFilterOptions): Promise<Report[]>;
-  create(report: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'timeline'>): Promise<Report>;
-  update(id: string, updates: Partial<Report>): Promise<Report | null>;
-  addTimelineEvent(reportId: string, event: Omit<TimelineEvent, 'id' | 'report_id' | 'timestamp'>): Promise<TimelineEvent>;
+  create(report: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'timeline'>, token?: string): Promise<Report>;
+  update(id: string, updates: Partial<Report>, token?: string): Promise<Report | null>;
+  addTimelineEvent(reportId: string, event: Omit<TimelineEvent, 'id' | 'report_id' | 'timestamp'>, token?: string): Promise<TimelineEvent>;
   delete(id: string): Promise<boolean>;
 }
 
 export interface ICollectionRepository {
   findAllTeams(): Promise<CollectionTeam[]>;
   findTeamById(id: string): Promise<CollectionTeam | null>;
-  findAllAssignments(teamId?: string): Promise<CollectionAssignment[]>;
-  findAssignmentById(id: string): Promise<CollectionAssignment | null>;
+  findAllAssignments(teamId?: string, token?: string): Promise<CollectionAssignment[]>;
+  findAssignmentById(id: string, token?: string): Promise<CollectionAssignment | null>;
   findAssignmentByReportId(reportId: string): Promise<CollectionAssignment | null>;
-  createAssignment(assignment: Omit<CollectionAssignment, 'id' | 'assigned_at'>): Promise<CollectionAssignment>;
-  updateAssignment(id: string, updates: Partial<CollectionAssignment>): Promise<CollectionAssignment | null>;
-  submitProof(assignmentId: string, proof: Omit<CollectionProof, 'id' | 'assignment_id' | 'recorded_at'>): Promise<CollectionProof>;
+  createAssignment(assignment: Omit<CollectionAssignment, 'id' | 'assigned_at'>, token?: string): Promise<CollectionAssignment>;
+  updateAssignment(id: string, updates: Partial<CollectionAssignment>, token?: string): Promise<CollectionAssignment | null>;
+  submitProof(assignmentId: string, proof: Omit<CollectionProof, 'id' | 'assignment_id' | 'recorded_at'>, token?: string): Promise<CollectionProof>;
   findAllZones(): Promise<JurisdictionZone[]>;
   findZoneById(id: string): Promise<JurisdictionZone | null>;
 }
 
 export interface IProcessingRepository {
-  findAllBatches(): Promise<ProcessingBatch[]>;
-  findBatchById(id: string): Promise<ProcessingBatch | null>;
-  createBatch(batch: Omit<ProcessingBatch, 'id' | 'created_at' | 'updated_at' | 'recovery_rate_percentage'>): Promise<ProcessingBatch>;
-  updateBatch(id: string, updates: Partial<ProcessingBatch>): Promise<ProcessingBatch | null>;
-  findAllProducts(): Promise<RecycledProduct[]>;
-  createProduct(product: Omit<RecycledProduct, 'id' | 'manufactured_at'>): Promise<RecycledProduct>;
+  findAllBatches(token?: string): Promise<ProcessingBatch[]>;
+  findBatchById(id: string, token?: string): Promise<ProcessingBatch | null>;
+  createBatch(batch: Omit<ProcessingBatch, 'id' | 'created_at' | 'updated_at' | 'recovery_rate_percentage'>, token?: string): Promise<ProcessingBatch>;
+  updateBatch(id: string, updates: Partial<ProcessingBatch>, token?: string): Promise<ProcessingBatch | null>;
+  findAllProducts(token?: string): Promise<RecycledProduct[]>;
+  createProduct(product: Omit<RecycledProduct, 'id' | 'manufactured_at'>, token?: string): Promise<RecycledProduct>;
 }
 
 export interface IAnalyticsRepository {

@@ -12,8 +12,9 @@ export class ProcessingService {
     materialType: WasteType;
     processedByName: string;
     notes?: string;
+    token?: string;
   }): Promise<ProcessingBatch> {
-    const { sourceReportIds, intakeQuantityKg, materialType, processedByName, notes } = params;
+    const { sourceReportIds, intakeQuantityKg, materialType, processedByName, notes, token } = params;
 
     // Calculate initial estimated recovery (e.g. 88-92% for clean streams)
     const estimatedRecovered = Math.round(intakeQuantityKg * 0.9);
@@ -28,18 +29,18 @@ export class ProcessingService {
       rejected_quantity_kg: estimatedRejected,
       processed_by_name: processedByName,
       notes: notes || `Batch initiated with ${sourceReportIds.length} source report(s)`
-    });
+    }, token);
 
     // Update each source report status to 'SORTING' then 'PROCESSING'
     for (const repId of sourceReportIds) {
-      await reportRepository.update(repId, { status: 'PROCESSING' });
+      await reportRepository.update(repId, { status: 'PROCESSING' }, token);
       await reportRepository.addTimelineEvent(repId, {
         status: 'PROCESSING',
-        actor_id: 'usr-prc-01',
+        actor_id: 'e0000000-0000-0000-0000-000000000001',
         actor_name: processedByName,
         actor_role: 'PROCESSING_TEAM',
         note: `Material integrated into Batch ${batch.id} for sorting and recovery.`
-      });
+      }, token);
     }
 
     return batch;
@@ -58,13 +59,14 @@ export class ProcessingService {
     dimensions?: string;
     prototypeCostInr: number;
     intendedApplication: string;
+    token?: string;
   }): Promise<{ batch: ProcessingBatch; product: RecycledProduct }> {
     const updatedBatch = await processingRepository.updateBatch(params.batchId, {
       recovered_quantity_kg: params.recoveredKg,
       rejected_quantity_kg: params.rejectedKg,
       status: 'COMPLETED',
       completed_at: new Date().toISOString()
-    });
+    }, params.token);
 
     if (!updatedBatch) {
       throw new Error(`Batch ${params.batchId} not found`);
@@ -81,18 +83,18 @@ export class ProcessingService {
       prototype_unit_cost_inr: params.prototypeCostInr,
       intended_application: params.intendedApplication,
       production_status: 'PILOT'
-    });
+    }, params.token);
 
     // Update all source reports to 'RECYCLED'
     for (const repId of updatedBatch.source_report_ids) {
-      await reportRepository.update(repId, { status: 'RECYCLED' });
+      await reportRepository.update(repId, { status: 'RECYCLED' }, params.token);
       await reportRepository.addTimelineEvent(repId, {
         status: 'RECYCLED',
-        actor_id: 'usr-prc-01',
+        actor_id: 'e0000000-0000-0000-0000-000000000001',
         actor_name: updatedBatch.processed_by_name,
         actor_role: 'PROCESSING_TEAM',
         note: `Material recovery complete in Batch ${updatedBatch.id}. Transformed into ${params.unitsProduced} units of ${params.productName}.`
-      });
+      }, params.token);
     }
 
     return { batch: updatedBatch, product };

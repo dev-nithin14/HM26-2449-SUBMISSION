@@ -13,11 +13,15 @@ import {
   CheckCircle2,
   Navigation,
   Upload,
+  UploadCloud,
   Scale,
   Camera,
   FileCheck,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
+import { useRealtimeSync, triggerLocalSync } from '../../hooks/useRealtimeSync';
+import { supabase } from '../../lib/supabase';
 
 export const CollectionDashboard: React.FC = () => {
   const { activeRole } = useAuth();
@@ -27,16 +31,15 @@ export const CollectionDashboard: React.FC = () => {
 
   // Proof Modal state
   const [proofModalAssignment, setProofModalAssignment] = useState<CollectionAssignment | null>(null);
-  const [proofPhotoUrl, setProofPhotoUrl] = useState(
-    'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=800&q=80'
-  );
+  const [proofPhotoUrl, setProofPhotoUrl] = useState('');
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
+  const [proofError, setProofError] = useState<string | null>(null);
   const [verifiedWeight, setVerifiedWeight] = useState<number>(3400);
   const [driverNotes, setDriverNotes] = useState(
     'Site cleared completely. Loaded onto 10-Ton tipper. Weighed at Mysore APMC weighbridge.'
   );
 
   const fetchAssignments = async () => {
-    setIsLoading(true);
     try {
       const data = await collectionsApi.getAll();
       setAssignments(data);
@@ -47,6 +50,8 @@ export const CollectionDashboard: React.FC = () => {
     }
   };
 
+  useRealtimeSync(['collection_assignments', 'reports'], fetchAssignments);
+
   useEffect(() => {
     fetchAssignments();
   }, [activeRole]);
@@ -55,6 +60,7 @@ export const CollectionDashboard: React.FC = () => {
     setActionLoading(true);
     try {
       await collectionsApi.update(assignmentId, 'ACCEPTED', 'Driver accepted collection assignment.');
+      triggerLocalSync('collection_assignments');
       await fetchAssignments();
     } finally {
       setActionLoading(false);
@@ -73,13 +79,68 @@ export const CollectionDashboard: React.FC = () => {
 
   const handleOpenProofModal = (assignment: CollectionAssignment) => {
     setProofModalAssignment(assignment);
+    setProofPhotoUrl('');
+    setProofError(null);
     const est = assignment.report?.estimated_quantity || 3000;
     setVerifiedWeight(est);
   };
 
+  const handleProofFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !proofModalAssignment) return;
+
+    setProofError(null);
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    if (!allowedTypes.includes(file.type)) {
+      setProofError('Unsupported file type. Only JPEG, PNG, and WebP images are allowed.');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setProofError(`File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds the 10 MB limit.`);
+      return;
+    }
+
+    setIsUploadingProof(true);
+    try {
+      const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const storagePath = `proofs/${proofModalAssignment.id}/${Date.now()}_${cleanName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('collection-proofs')
+        .upload(storagePath, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadError) {
+        setProofError(`Proof upload failed: ${uploadError.message}`);
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from('collection-proofs')
+        .getPublicUrl(storagePath);
+
+      setProofPhotoUrl(publicUrlData.publicUrl);
+    } catch (err: any) {
+      setProofError(`Storage upload error: ${err.message}`);
+    } finally {
+      setIsUploadingProof(false);
+      e.target.value = '';
+    }
+  };
+
   const handleSubmitProof = async () => {
     if (!proofModalAssignment) return;
+    if (!proofPhotoUrl) {
+      setProofError('Please upload a collection proof photograph or specify a valid proof URL.');
+      return;
+    }
+
     setActionLoading(true);
+    setProofError(null);
     try {
       await collectionsApi.submitProof(proofModalAssignment.id, {
         photo_url: proofPhotoUrl,
@@ -90,8 +151,8 @@ export const CollectionDashboard: React.FC = () => {
       });
       setProofModalAssignment(null);
       await fetchAssignments();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setProofError(err.message || 'Failed to submit proof');
     } finally {
       setActionLoading(false);
     }
@@ -323,24 +384,60 @@ export const CollectionDashboard: React.FC = () => {
             />
           </div>
 
+          {proofError && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{proofError}</span>
+            </div>
+          )}
+
           <div className="space-y-1.5">
-            <label className="font-semibold text-charcoal-800 flex items-center gap-1.5">
-              <Camera className="w-3.5 h-3.5 text-forest-700" />
-              Collection Photo Proof URL
+            <label className="font-semibold text-charcoal-800 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-forest-700" />
+                Upload Weighbridge / Site Clearance Photo Proof
+              </span>
+              <span className="text-[10px] text-charcoal-400 font-normal">Max 10MB (JPEG, PNG, WebP)</span>
             </label>
-            <input
-              type="text"
-              value={proofPhotoUrl}
-              onChange={(e) => setProofPhotoUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-sand-300 focus:outline-none focus:ring-2 focus:ring-forest-600"
-            />
+
+            {/* Storage File Upload Area */}
+            <label className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition ${
+              isUploadingProof
+                ? 'border-forest-400 bg-forest-50/40 pointer-events-none'
+                : 'border-sand-300 hover:border-forest-600 bg-sand-50/50 hover:bg-forest-50/20'
+            }`}>
+              {isUploadingProof ? (
+                <div className="flex items-center gap-2 py-2 text-forest-700">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-xs font-semibold">Uploading proof to Supabase Storage...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 py-2 text-charcoal-600">
+                  <UploadCloud className="w-5 h-5 text-sand-500" />
+                  <span className="text-xs font-medium">Click to select photo or drag and drop</span>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleProofFileUpload}
+                disabled={isUploadingProof}
+                className="hidden"
+              />
+            </label>
+
             {proofPhotoUrl && (
-              <div className="h-32 rounded-xl overflow-hidden border border-sand-200 mt-2">
-                <img
-                  src={proofPhotoUrl}
-                  alt="Proof Preview"
-                  className="w-full h-full object-cover"
-                />
+              <div className="space-y-1.5 mt-2">
+                <div className="h-32 rounded-xl overflow-hidden border border-sand-200 shadow-sm relative group">
+                  <img
+                    src={proofPhotoUrl}
+                    alt="Proof Preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-0 inset-x-0 bg-charcoal-900/60 backdrop-blur-xs px-2.5 py-1 text-[10px] text-white truncate font-mono">
+                    {proofPhotoUrl}
+                  </div>
+                </div>
               </div>
             )}
           </div>

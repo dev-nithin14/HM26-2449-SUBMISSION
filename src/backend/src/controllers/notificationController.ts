@@ -4,7 +4,13 @@ import { notificationRepository } from '../repositories/index.js';
 
 export async function getNotifications(req: AuthenticatedRequest, res: Response) {
   try {
-    const userId = req.user?.id || 'usr-cit-01';
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      });
+    }
+    const userId = req.user.id;
     const notifications = await notificationRepository.findByUserId(userId);
     return res.json({
       success: true,
@@ -36,7 +42,13 @@ export async function markAsRead(req: AuthenticatedRequest, res: Response) {
 
 export async function markAllAsRead(req: AuthenticatedRequest, res: Response) {
   try {
-    const userId = req.user?.id || 'usr-cit-01';
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      });
+    }
+    const userId = req.user.id;
     const ok = await notificationRepository.markAllAsRead(userId);
     return res.json({
       success: true,

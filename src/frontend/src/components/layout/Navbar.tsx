@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { notificationsApi } from '../../api/client';
 import { NotificationItem } from '../../types';
 import { UserRole } from '../../types';
+import { useRealtimeSync } from '../../hooks/useRealtimeSync';
 import {
   Recycle,
   PlusCircle,
@@ -83,10 +84,10 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  useRealtimeSync(['notifications'], fetchNotifs);
+
   useEffect(() => {
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 10000);
-    return () => clearInterval(interval);
   }, [activeRole]);
 
   useEffect(() => {

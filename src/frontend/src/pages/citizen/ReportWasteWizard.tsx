@@ -5,6 +5,8 @@ import { reportsApi } from '../../api/client';
 import { WasteType } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { MapPicker } from '../../components/shared/MapPicker';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 import {
   UploadCloud,
   X,
@@ -17,24 +19,20 @@ import {
   AlertCircle,
   HelpCircle,
   HardHat,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 export const ReportWasteWizard: React.FC = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Form State
-  const [images, setImages] = useState<{ id: string; url: string; name: string; size: number }[]>([
-    {
-      id: 'demo-img-1',
-      url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
-      name: 'demolition_rubble_01.jpg',
-      size: 1450000
-    }
-  ]);
+  // Form State — images uploaded directly to Supabase Storage
+  const [images, setImages] = useState<{ id: string; url: string; name: string; size: number; path?: string }[]>([]);
 
   const [wasteType, setWasteType] = useState<WasteType>('CONCRETE');
   const [isUncertainType, setIsUncertainType] = useState(false);
@@ -56,36 +54,65 @@ export const ReportWasteWizard: React.FC = () => {
     'Broad road access. Trucks up to 10 tons can reverse safely to the gate.'
   );
 
-  // Image Upload Handler
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image Upload Handler — uploads directly to Supabase Storage 'report-images'
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (!file.type.startsWith('image/')) {
-        alert('Only image files (JPG, PNG, WebP) are allowed');
-        continue;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size exceeds 10MB limit');
-        continue;
-      }
+    setErrorMsg(null);
+    setIsUploading(true);
 
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const base64 = loadEvent.target?.result as string;
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        if (!allowedTypes.includes(file.type)) {
+          setErrorMsg(`File "${file.name}" is not supported. Only JPEG, PNG, and WebP images are allowed.`);
+          continue;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          setErrorMsg(`File "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds the 10 MB limit.`);
+          continue;
+        }
+
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const storagePath = `reports/${currentUser?.id || 'public'}/${Date.now()}-${Math.random().toString(36).substring(2, 7)}_${cleanName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('report-images')
+          .upload(storagePath, file, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (uploadError) {
+          setErrorMsg(`Upload failed for "${file.name}": ${uploadError.message}`);
+          continue;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('report-images')
+          .getPublicUrl(storagePath);
+
         setImages((prev) => [
           ...prev,
           {
             id: `img-${Date.now()}-${i}`,
-            url: base64,
+            url: publicUrlData.publicUrl,
             name: file.name,
-            size: file.size
+            size: file.size,
+            path: storagePath
           }
         ]);
-      };
-      reader.readAsDataURL(file);
+      }
+    } catch (err: any) {
+      setErrorMsg(`Storage error: ${err.message}`);
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -224,19 +251,38 @@ export const ReportWasteWizard: React.FC = () => {
             </div>
 
             {/* Drag & Drop Upload Area */}
-            <label className="border-2 border-dashed border-sand-300 hover:border-forest-600 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer bg-sand-50/50 hover:bg-forest-50/20 transition group">
-              <UploadCloud className="w-10 h-10 text-sand-400 group-hover:text-forest-700 transition mb-2" />
-              <span className="text-sm font-semibold text-charcoal-800">
-                Click to upload or drag & drop files
-              </span>
-              <span className="text-xs text-charcoal-400 mt-0.5">
-                PNG, JPG or WebP up to 10MB each
-              </span>
+            <label className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition group ${
+              isUploading
+                ? 'border-forest-400 bg-forest-50/40 pointer-events-none'
+                : 'border-sand-300 hover:border-forest-600 bg-sand-50/50 hover:bg-forest-50/20'
+            }`}>
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-10 h-10 text-forest-700 animate-spin mb-2" />
+                  <span className="text-sm font-semibold text-charcoal-800">
+                    Uploading photographs to Supabase Storage...
+                  </span>
+                  <span className="text-xs text-charcoal-400 mt-0.5">
+                    Validating size and file integrity
+                  </span>
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="w-10 h-10 text-sand-400 group-hover:text-forest-700 transition mb-2" />
+                  <span className="text-sm font-semibold text-charcoal-800">
+                    Click to upload or drag & drop files
+                  </span>
+                  <span className="text-xs text-charcoal-400 mt-0.5">
+                    JPEG, PNG or WebP up to 10MB each
+                  </span>
+                </>
+              )}
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileUpload}
+                disabled={isUploading}
                 className="hidden"
               />
             </label>

@@ -16,6 +16,7 @@ import { aiAnalysisService } from '../services/ai/aiAnalysisService.js';
 import { verificationService } from '../services/verification/verificationService.js';
 import { priorityService } from '../services/priority/priorityService.js';
 import { routingService } from '../services/routing/routingService.js';
+import { uploadReportImage } from '../services/storage/storageService.js';
 import { ReportImage } from '../types/index.js';
 
 export async function getReports(req: AuthenticatedRequest, res: Response) {
@@ -46,24 +47,45 @@ export async function getReports(req: AuthenticatedRequest, res: Response) {
 export async function createReport(req: AuthenticatedRequest, res: Response) {
   try {
     const validated = CreateReportSchema.parse(req.body);
-    const currentUser = req.user || {
-      id: 'usr-cit-01',
-      name: 'Aarav Sharma',
-      role: 'CITIZEN',
-      phone: '+91 98450 12345'
-    };
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required. Please sign in to submit a report.' }
+      });
+    }
+    const currentUser = req.user;
 
     const tempId = `RBL-MYS-TEMP-${Date.now()}`;
+    const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
 
-    // Format images
-    const reportImages: ReportImage[] = validated.images.map((img) => ({
-      id: `img-${uuidv4().substring(0, 8)}`,
-      report_id: tempId,
-      image_url: img.image_url,
-      thumbnail_url: img.thumbnail_url,
-      file_size_bytes: img.file_size_bytes,
-      uploaded_at: new Date().toISOString()
-    }));
+    // Format images — ensuring any base64 data is uploaded to Supabase Storage
+    const reportImages: ReportImage[] = await Promise.all(
+      validated.images.map(async (img, idx) => {
+        let imageUrl = img.image_url;
+        let sizeBytes = img.file_size_bytes;
+
+        // If client passed a base64 data URL, upload to Supabase Storage report-images
+        if (imageUrl.startsWith('data:')) {
+          const uploadResult = await uploadReportImage(
+            imageUrl,
+            `waste_photo_${idx + 1}.jpg`,
+            currentUser.id,
+            token
+          );
+          imageUrl = uploadResult.publicUrl;
+          sizeBytes = uploadResult.sizeBytes;
+        }
+
+        return {
+          id: `img-${uuidv4().substring(0, 8)}`,
+          report_id: tempId,
+          image_url: imageUrl,
+          thumbnail_url: img.thumbnail_url || imageUrl,
+          file_size_bytes: sizeBytes,
+          uploaded_at: new Date().toISOString()
+        };
+      })
+    );
 
     // Trigger Prototype AI Analysis
     const aiResult = aiAnalysisService.analyzeReport({
@@ -127,7 +149,7 @@ export async function createReport(req: AuthenticatedRequest, res: Response) {
       priority_reasons: priorityResult.priority_reasons,
       images: reportImages.map((img) => ({ ...img, report_id: tempId })),
       ai_analysis: { ...aiResult, report_id: tempId }
-    });
+    }, token);
 
     // Fix IDs on images and ai_analysis
     created.images = created.images.map((i) => ({ ...i, report_id: created.id }));
@@ -142,7 +164,7 @@ export async function createReport(req: AuthenticatedRequest, res: Response) {
       actor_name: 'AI Analysis Service (v1.4)',
       actor_role: 'ADMIN',
       note: `Analyzed composition: ${aiResult.waste_composition.concrete_percentage}% Concrete, ${aiResult.waste_composition.bricks_percentage}% Bricks. Recyclability rated ${aiResult.recyclability}. Confidence ${Math.round(aiResult.confidence * 100)}%.`
-    });
+    }, token);
 
     // Notify citizen
     await notificationRepository.create({
@@ -156,7 +178,7 @@ export async function createReport(req: AuthenticatedRequest, res: Response) {
 
     // Notify admins
     await notificationRepository.create({
-      user_id: 'usr-adm-01',
+      user_id: 'a0000000-0000-0000-0000-000000000001',
       title: 'New C&D Waste Report Received',
       message: `New report ${created.id} (${created.waste_type}, ${created.estimated_quantity} ${created.quantity_unit}) at ${created.address}.`,
       report_id: created.id,
@@ -213,7 +235,13 @@ export async function updateReport(req: AuthenticatedRequest, res: Response) {
   try {
     const { id } = req.params;
     const validated = UpdateReportSchema.parse(req.body);
-    const currentUser = req.user || { id: 'usr-adm-01', name: 'Admin', role: 'ADMIN' };
+    const currentUser = req.user;
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Authentication required' }
+      });
+    }
 
     const report = await reportRepository.findById(id);
     if (!report) {
@@ -223,11 +251,12 @@ export async function updateReport(req: AuthenticatedRequest, res: Response) {
       });
     }
 
+    const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
     const updates: any = {};
     if (validated.status) updates.status = validated.status;
     if (validated.priority) updates.priority = validated.priority;
 
-    const updated = await reportRepository.update(id, updates);
+    const updated = await reportRepository.update(id, updates, token);
 
     if (validated.status && validated.status !== report.status) {
       await reportRepository.addTimelineEvent(id, {
@@ -236,7 +265,7 @@ export async function updateReport(req: AuthenticatedRequest, res: Response) {
         actor_name: currentUser.name,
         actor_role: currentUser.role,
         note: validated.notes || `Report status updated to ${validated.status}`
-      });
+      }, token);
     }
 
     const fresh = await reportRepository.findById(id);
@@ -320,7 +349,13 @@ export async function verifyReport(req: AuthenticatedRequest, res: Response) {
   try {
     const { id } = req.params;
     const validated = VerifyReportSchema.parse(req.body);
-    const currentUser = req.user || { id: 'usr-adm-01', name: 'Pooja Kulkarni', role: 'ADMIN' };
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Only an administrator can verify reports.' }
+      });
+    }
+    const currentUser = req.user;
 
     const report = await reportRepository.findById(id);
     if (!report) {
@@ -347,10 +382,12 @@ export async function verifyReport(req: AuthenticatedRequest, res: Response) {
       nextReportStatus = 'DUPLICATE';
     }
 
+    const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+
     await reportRepository.update(id, {
       verification,
       status: nextReportStatus
-    });
+    }, token);
 
     await reportRepository.addTimelineEvent(id, {
       status: nextReportStatus,
@@ -358,7 +395,7 @@ export async function verifyReport(req: AuthenticatedRequest, res: Response) {
       actor_name: currentUser.name,
       actor_role: currentUser.role,
       note: validated.notes || `Report verification updated to ${verification.status}.`
-    });
+    }, token);
 
     // Notify citizen
     await notificationRepository.create({
@@ -444,7 +481,13 @@ export async function assignReport(req: AuthenticatedRequest, res: Response) {
   try {
     const { id } = req.params;
     const validated = AssignReportSchema.parse(req.body);
-    const currentUser = req.user || { id: 'usr-adm-01', name: 'Pooja Kulkarni', role: 'ADMIN' };
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Only an administrator can dispatch collection assignments.' }
+      });
+    }
+    const currentUser = req.user;
 
     const report = await reportRepository.findById(id);
     if (!report) {
@@ -462,21 +505,23 @@ export async function assignReport(req: AuthenticatedRequest, res: Response) {
       });
     }
 
+    const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+
     // Create assignment
     const assignment = await collectionRepository.createAssignment({
       report_id: id,
       collection_team_id: team.id,
       collection_team_name: team.team_name,
       status: 'PENDING',
-      assigned_by: currentUser.name
-    });
+      assigned_by: currentUser.id
+    }, token);
 
     // Update report
     await reportRepository.update(id, {
       status: 'ASSIGNED',
       assigned_collection_team_id: team.id,
       assigned_collection_team_name: team.team_name
-    });
+    }, token);
 
     await reportRepository.addTimelineEvent(id, {
       status: 'ASSIGNED',
@@ -484,7 +529,7 @@ export async function assignReport(req: AuthenticatedRequest, res: Response) {
       actor_name: currentUser.name,
       actor_role: currentUser.role,
       note: `Assigned to ${team.team_name} (Lead: ${team.lead_driver_name}, Vehicle: ${team.vehicle_number}).`
-    });
+    }, token);
 
     // Notifications
     await notificationRepository.create({

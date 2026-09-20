@@ -7,14 +7,15 @@ import {
   getProducts,
   createProduct
 } from '../controllers/processingController.js';
+import { requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get('/', getBatches);
-router.post('/', createBatch);
+router.post('/', requireRole(['PROCESSING_TEAM', 'ADMIN']), createBatch);
 router.get('/products', getProducts);
-router.post('/products', createProduct);
+router.post('/products', requireRole(['PROCESSING_TEAM', 'ADMIN']), createProduct);
 router.get('/:id', getBatchById);
-router.patch('/:id', updateBatch);
+router.patch('/:id', requireRole(['PROCESSING_TEAM', 'ADMIN']), updateBatch);
 
 export default router;
