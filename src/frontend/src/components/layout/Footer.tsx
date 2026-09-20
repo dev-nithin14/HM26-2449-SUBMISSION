@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Recycle, ShieldCheck, Heart, ExternalLink } from 'lucide-react';
+import { Recycle, ShieldCheck, Heart } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
     <footer className="bg-charcoal-900 text-sand-300 pt-12 pb-8 border-t border-charcoal-800 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
           {/* Col 1 */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
@@ -45,19 +45,6 @@ export const Footer: React.FC = () => {
               <li><Link to="/admin/map" className="hover:text-white transition">Interactive GIS Map</Link></li>
               <li><Link to="/admin/hotspots" className="hover:text-white transition">High-density Ward Hotspots</Link></li>
             </ul>
-          </div>
-
-          {/* Col 4 */}
-          <div>
-            <h4 className="text-sm font-semibold text-white mb-3">Developer Contract & Info</h4>
-            <p className="text-sand-400 leading-relaxed mb-3">
-              Full-stack application with strict Repository abstraction. Ready for Developer 2 Supabase handoff.
-            </p>
-            <div className="space-y-1.5 font-mono text-[11px] text-forest-400">
-              <p>• docs/DATABASE_CONTRACT.md</p>
-              <p>• docs/API_CONTRACT.md</p>
-              <p>• docs/ARCHITECTURE.md</p>
-            </div>
           </div>
         </div>
 
