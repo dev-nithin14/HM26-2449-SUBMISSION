@@ -18,7 +18,8 @@ The following constraints are treated as core engineering considerations for ReB
 
 - **Approach:** The MVP uses input validation, duplicate-probability analysis, verification workflow and role-based review. Reports can be flagged as `DUPLICATE` or `REJECTED` instead of automatically entering the collection workflow.
 - **Human review:** Verification is kept as a separate workflow so AI/prototype analysis is not treated as the final decision.
-- **Anonymity trade-off:** The current MVP focuses on role-based reporting and workflow verification rather than providing anonymous reporting. Production deployment would require stronger identity, abuse-prevention and moderation mechanisms.
+- **Authentication:** Supabase Authentication provides application-level user authentication. However, the MVP does not provide government-grade identity verification or a production-scale abuse-prevention system.
+- **Anonymity trade-off:** The current MVP focuses on authenticated, role-based reporting and workflow verification rather than anonymous reporting. Production deployment would require stronger identity, abuse-prevention and moderation mechanisms.
 - **Code:** `src/backend/`
 
 ---
@@ -28,6 +29,7 @@ The following constraints are treated as core engineering considerations for ReB
 - **Approach:** The MVP contains a routing/jurisdiction service that maps reports to project-defined collection zones.
 - **Boundary cases:** Reports that do not clearly map to a zone can remain in the operational workflow for review rather than being silently assigned to an incorrect jurisdiction.
 - **Important limitation:** The collection zones used by the MVP are synthetic/demo zones around Mysuru. They are **not official municipal ward or panchayat boundaries**.
+- **Future requirement:** Production deployment would require verified and authorized municipal/GIS boundary data.
 - **Code:** `src/backend/`
 
 ---
@@ -42,7 +44,7 @@ The following constraints are treated as core engineering considerations for ReB
   - Recyclability
   - Duplicate probability
 
-  The resulting priority is classified as `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`, with reasons returned alongside the result.
+The resulting priority is classified as `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`, with reasons returned alongside the result.
 
 - **Why not simply "most votes":** Construction-waste management depends on operational factors such as quantity, environmental/location sensitivity, urgency and recyclability. Therefore, report frequency alone is insufficient for deciding collection priority.
 - **Code:** `src/backend/`
@@ -70,8 +72,23 @@ The following constraints are treated as core engineering considerations for ReB
 
 ---
 
+## Supabase and Persistence
+
+The final MVP uses **Supabase** as the persistent backend and database layer.
+
+- Supabase Authentication provides application-level authentication.
+- Supabase PostgreSQL provides persistent storage for application data.
+- The application uses repository and service layers to separate business logic from persistence.
+- Authentication and persistent data therefore replace the earlier prototype assumption of fixed client-side demo credentials and in-memory application state.
+
+The project does not claim that Supabase integration by itself provides government-grade identity verification, complete abuse prevention or municipal authorization.
+
+---
+
 ## Current Constraint Summary
 
 The strongest implemented constraint handling in the MVP is the multi-factor prioritisation workflow and the separation of verification, routing and operational stages.
 
-The main limitations are production-grade abuse prevention, official jurisdiction data, comprehensive input moderation and complete offline operation. These are documented explicitly rather than being presented as solved capabilities.
+The main limitations are production-grade abuse prevention, official jurisdiction data, comprehensive input moderation and complete offline operation.
+
+These limitations are documented explicitly rather than being presented as solved capabilities.

@@ -13,7 +13,7 @@
 | Team Name | `ReBuild Mysore` |
 | College | `Maharaja Institute of Technology Mysore` |
 | Team Leader | `Nithin B C` |
-| Repository | `https://github.com/dev-nithin14/HM26-2449-SUBMISSION` |
+| Repository | [GitHub Repository](https://github.com/dev-nithin14/HM26-2449-SUBMISSION) |
 
 | # | Member | Program & Year | GitHub Handle | Primary Role |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@
 | 3 | `Adithya S Yadav` | `B.E. CSE-AI&ML` | `@<handle>` | `<role>` |
 | 4 | `Touheed Khan` | `B.E. CSE-AI&ML` | `@<handle>` | `<role>` |
 
-> Replace the remaining GitHub handles and roles with the actual team details before submission.
+> **Before submission:** Replace the remaining GitHub handles and roles with the actual team details.
 
 ---
 
@@ -30,7 +30,8 @@
 
 **Sub-problem:** `End-to-end construction-waste coordination`
 
-**In one sentence:**  
+**In one sentence:**
+
 `ReBuild Mysore is a role-based civic platform that connects construction-waste reporting with AI-assisted analysis, verification, prioritisation, collection, processing, recycling, and impact tracking.`
 
 ---
@@ -39,11 +40,11 @@
 
 | Document | What it covers |
 |---|---|
-| [README.md](./README.md) | Problem, target users, solution, architecture, AI usage, setup and limitations |
+| [README.md](./README.md) | Problem, target users, solution, architecture, setup and limitations |
 | [ai.md](./ai.md) | AI tools used during development and AI/ML functionality inside the product |
 | [docs/architecture.md](./docs/architecture.md) | System architecture, components, data model, APIs and technical stack |
 | [docs/constraints.md](./docs/constraints.md) | Handling of the five hard constraints |
-| [docs/setup.md](./docs/setup.md) | Local setup, environment configuration, demo accounts and testing |
+| [docs/setup.md](./docs/setup.md) | Local setup, Supabase configuration and testing |
 | [docs/limitations.md](./docs/limitations.md) | Known limitations, edge cases and scaling roadmap |
 | [resource-templates/](./resource-templates/) | Submission templates and supporting guides |
 
@@ -57,11 +58,11 @@
 | 2 | Decision Log (1 page) | `TO BE ADDED` | `HM26-2449_decision-log.pdf` | `TO BE ADDED` |
 | 3 | Presentation | `TO BE ADDED` | `HM26-2449_presentation.pdf` | `TO BE ADDED` |
 
-> All final evaluation artifacts will be uploaded to Google Drive with Viewer access and linked here before the submission freeze.
+> Final evaluation artifacts will be uploaded to Google Drive with Viewer access and linked here before the submission freeze.
 
 ### Video Chapters
 
-> Update these timestamps after the final recording. The structure below follows the required evaluation flow.
+> Update these timestamps after the final recording. The structure below follows the planned evaluation flow.
 
 | Timestamp | Section |
 |---|---|
@@ -83,40 +84,41 @@
 
 | Field | Value |
 |---|---|
-| Live URL | `https://hm-26-2449-submission.vercel.app/` |
+| Live URL | [ReBuild Mysore MVP](https://hm-26-2449-submission.vercel.app/) |
 | Platform | `Web Application` |
-| Database | `Demo / repository-based persistence; Supabase is not currently connected to this MVP` |
-| Sample data loaded? | `Yes — fictional/demo Mysuru records` |
-| Offline mode | `The current MVP is online-first. API-dependent operations require network connectivity.` |
+| Authentication | `Supabase Authentication` |
+| Database | `Supabase PostgreSQL` |
+| Sample data loaded? | `Yes — seeded/demo Mysuru records` |
+| Offline mode | `Online-first. API-dependent operations require network connectivity.` |
 | Local setup | Follow [docs/setup.md](./docs/setup.md) |
 
-### Demo Accounts
+### Authentication
 
-All demo accounts use the password:
+The final MVP uses **Supabase Authentication** for application-level user authentication.
 
-`demo123`
+Role-specific application workflows are available according to the authenticated user's role.
 
-| Role | Demo Email |
-|---|---|
-| Citizen | `citizen@rebuildmysore.demo` |
-| Builder | `builder@rebuildmysore.demo` |
-| Collection Crew | `collection@rebuildmysore.demo` |
-| Processing Plant | `processing@rebuildmysore.demo` |
-| MCC Admin | `admin@rebuildmysore.demo` |
+The MVP does not claim government-grade identity verification or production municipal authorization.
 
-The login page provides role cards that automatically fill the corresponding demo credentials.
+> **Do not publish passwords or secret credentials in this file.** Evaluators should use the configured evaluation access process provided with the final submission.
 
 ---
 
 ## 6. Quick Reviewer Path
 
-A reviewer can understand the core workflow in approximately 3 minutes:
+A reviewer can understand the core workflow through the following path:
 
 1. Open the [live MVP](https://hm-26-2449-submission.vercel.app/).
-2. Use the **Citizen** demo account to submit/view a construction-waste report.
-3. Observe AI-assisted analysis, verification and priority information associated with the report.
-4. Use the **Collection Crew**, **Processing Plant**, or **MCC Admin** demo account to explore the corresponding operational dashboards.
-5. Follow the report lifecycle from **Report → Verify → Prioritize → Collect → Process → Recycle → Impact**.
+2. Authenticate using the evaluation access provided for the submission.
+3. Explore the relevant role-based dashboard.
+4. Submit or inspect a construction-waste report.
+5. Observe analysis, verification and priority information associated with the report.
+6. Explore the collection and processing workflow.
+7. Follow the report lifecycle from:
+
+**Report → Analyze → Verify → Prioritize → Assign → Collect → Process → Recycle → Measure Impact**
+
+The project uses demonstration/seeded data and project-defined collection zones for evaluation.
 
 ---
 
@@ -125,7 +127,7 @@ A reviewer can understand the core workflow in approximately 3 minutes:
 The MVP demonstrates:
 
 - Construction-waste reporting with structured information.
-- AI-assisted waste analysis signals.
+- AI-assisted waste-analysis signals.
 - Duplicate and verification checks.
 - Priority calculation using multiple operational factors.
 - Role-based workflows for citizens, builders, collection teams, processing teams and administrators.
@@ -133,7 +135,11 @@ The MVP demonstrates:
 - Material recovery and recycled-product tracking.
 - Analytics and impact-oriented views.
 - API-based frontend/backend architecture.
+- Supabase Authentication.
+- Supabase PostgreSQL persistent data storage.
+- Repository and service-layer separation.
 - Demo Mysuru locations and records clearly treated as prototype data.
+- Explicit documentation of offline and production-deployment limitations.
 
 ---
 
@@ -145,6 +151,9 @@ The MVP demonstrates:
 - [ ] All AI tools used during development and inside the product are disclosed in [ai.md](./ai.md).
 - [ ] No challenge-specific code was written before `18 September 2026, 00:00 IST`.
 - [ ] Final artifact links and SHA-256 hashes will be frozen before the submission deadline.
+- [ ] All team member GitHub handles and roles have been verified.
+- [ ] The live MVP has been tested using the final Supabase environment.
+- [ ] The final repository contains no committed secrets or private credentials.
 
 ---
 
